@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analizador de Competidores - Feedback Interno</title>
+  <meta name="description" content="Herramienta interna para analizar el diseño, interactividad y estructura de los competidores y recolectar feedback detallado.">
+  
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* variables de diseño */
+    :root {
+      --bg-dark: #090a0f;
+      --bg-card: rgba(17, 19, 31, 0.75);
+      --bg-card-hover: rgba(26, 29, 46, 0.85);
+      --primary: #7c3aed; /* Violeta */
+      --primary-glow: rgba(124, 58, 237, 0.3);
+      --secondary: #0891b2; /* Cian */
+      --secondary-glow: rgba(8, 145, 178, 0.3);
+      --success: #10b981; /* Verde esmeralda */
+      --success-glow: rgba(16, 185, 129, 0.2);
+      --warning: #f59e0b; /* Ámbar para estrellas */
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dark: #4b5563;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(124, 58, 237, 0.5);
+      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+      --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(124, 58, 237, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(8, 145, 178, 0.08) 0%, transparent 40%);
+      background-attachment: fixed;
+    }
+
+    /* Scrollbars personalizados */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    header {
+      background: rgba(9, 10, 15, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 2.25rem;
+      height: 2.25rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #fff;
+      font-size: 1.25rem;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.025em;
+      background: linear-gradient(to right, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-badge {
+      background: rgba(124, 58, 237, 0.15);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      color: #a78bfa;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* Layout principal */
+    .app-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: calc(100vh - 73px);
+    }
+
+    /* Sidebar de Competidores */
+    .sidebar {
+      background: rgba(13, 15, 24, 0.5);
+      border-right: 1px solid var(--border);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .sidebar-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .competitor-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .competitor-btn {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: 12px;
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .competitor-btn::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: transparent;
+      transition: var(--transition);
+    }
+
+    .competitor-btn:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .competitor-btn.active {
+      background: rgba(124, 58, 237, 0.08);
+      border-color: var(--primary);
+      box-shadow: 0 0 15px rgba(124, 58, 237, 0.1);
+    }
+
+    .competitor-btn.active::before {
+      background: var(--primary);
+    }
+
+    .competitor-name {
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .competitor-url {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .competitor-status-badge {
+      align-self: flex-start;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .competitor-btn.active .competitor-status-badge {
+      background: rgba(124, 58, 237, 0.2);
+      color: #c084fc;
+      border-color: rgba(124, 58, 237, 0.3);
+    }
+
+    .competitor-btn.has-feedback .competitor-status-badge {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    /* Área de Trabajo Principal */
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 480px;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* Panel del Visor de Screenshot */
+    .viewer-panel {
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      background: #06070a;
+      height: min-content;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .viewer-header {
+      background: rgba(13, 15, 24, 0.8);
+      padding: 0.75rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .viewer-title {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .viewer-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .control-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .control-zoom-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      min-width: 36px;
+      text-align: center;
+    }
+
+    /* Contenedor de la Imagen */
+    .image-container {
+      flex: 1;
+      overflow: auto;
+      position: relative;
+      background: #020204;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      cursor: grab;
+    }
+
+    .image-container:active {
+      cursor: grabbing;
+    }
+
+    .screenshot-img {
+      max-width: 100%;
+      height: auto;
+      transform-origin: top center;
+      transition: width 0.25s ease, transform 0.25s ease;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    /* Panel de Feedback */
+    .feedback-panel {
+      padding: 2rem;
+      overflow-y: auto;
+      background: rgba(10, 11, 18, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      height: 100%;
+    }
+
+    .panel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      backdrop-filter: blur(16px);
+      box-shadow: var(--glass-shadow);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #fff;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+
+    /* Puntuación de Estrellas */
+    .rating-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .rating-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .stars-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .star {
+      font-size: 2rem;
+      color: rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      transition: var(--transition);
+      user-select: none;
+    }
+
+    .star:hover {
+      transform: scale(1.2);
+    }
+
+    .star.hovered, .star.selected {
+      color: var(--warning);
+      text-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+    }
+
+    /* Campos de Entrada de Texto */
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .input-group label span {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .textarea-styled {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      padding: 0.75rem;
+      min-height: 100px;
+      resize: vertical;
+      transition: var(--transition);
+    }
+
+    .textarea-styled:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 10px var(--primary-glow);
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    /* Checklist de Ítems que no gustaron */
+    .checklist-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .checklist-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.65rem;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      user-select: none;
+    }
+
+    .check-item:hover {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .check-item input[type="checkbox"] {
+      display: none;
+    }
+
+    .custom-checkbox {
+      width: 1.1rem;
+      height: 1.1rem;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+      margin-right: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .check-item input[type="checkbox"]:checked + .custom-checkbox {
+      background: var(--secondary);
+      border-color: var(--secondary);
+      box-shadow: 0 0 8px var(--secondary-glow);
+    }
+
+    .check-item input[type="checkbox"]:checked + .custom-checkbox::after {
+      content: '✓';
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+
+    .check-label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      transition: var(--transition);
+    }
+
+    .check-item input[type="checkbox"]:checked ~ .check-label {
+      color: #fff;
+      font-weight: 500;
+    }
+
+    /* Panel de Exportación */
+    .export-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #6d28d9);
+      color: #fff;
+      border: none;
+      padding: 0.9rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    /* Visor de código JSON */
+    .json-preview-container {
+      margin-top: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .json-preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .json-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .json-code {
+      background: #020204;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.8rem;
+      max-height: 250px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      color: #34d399; /* Verde consola */
+    }
+
+    /* Modal de Confirmación */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: #11131f;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .modal-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .app-container {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+      .workspace {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .viewer-panel {
+        height: 600px;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+      .feedback-panel {
+        height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">C</div>
+      <h1>Analizador de Competidores</h1>
+    </div>
+    <span class="header-badge" id="app-badge">Feedback listo</span>
+  </header>
+
+  <div class="app-container">
+    <!-- Sidebar con Competidores -->
+    <aside class="sidebar">
+      <h2 class="sidebar-title">Sitios Competidores</h2>
+      <ul class="competitor-list">
+        <li>
+          <button class="competitor-btn active" onclick="switchCompetitor('stripe')" id="btn-stripe">
+            <span class="competitor-name">Stripe</span>
+            <span class="competitor-url">stripe.com/es-us</span>
+            <span class="competitor-status-badge" id="badge-stripe">Sin feedback</span>
+          </button>
+        </li>
+        <li>
+          <button class="competitor-btn" onclick="switchCompetitor('locomotive')" id="btn-locomotive">
+            <span class="competitor-name">Locomotive</span>
+            <span class="competitor-url">locomotive.ca/en</span>
+            <span class="competitor-status-badge" id="badge-locomotive">Sin feedback</span>
+          </button>
+        </li>
+        <li>
+          <button class="competitor-btn" onclick="switchCompetitor('yamaha')" id="btn-yamaha">
+            <span class="competitor-name">Yamaha Incolmotos</span>
+            <span class="competitor-url">incolmotos-yamaha.com.co</span>
+            <span class="competitor-status-badge" id="badge-yamaha">Sin feedback</span>
+          </button>
+        </li>
+        <li>
+          <button class="competitor-btn" onclick="switchCompetitor('walmart')" id="btn-walmart">
+            <span class="competitor-name">Walmart</span>
+            <span class="competitor-url">walmart.com</span>
+            <span class="competitor-status-badge" id="badge-walmart">Sin feedback</span>
+          </button>
+        </li>
+      </ul>
+      
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+        <button class="btn-secondary" style="width: 100%; border-color: rgba(239, 68, 68, 0.2); color: #ef4444;" onclick="openClearModal()">
+          ✕ Limpiar Todo
+        </button>
+      </div>
+    </aside>
+
+    <!-- Área de Trabajo (Visualizador + Formulario) -->
+    <main class="workspace">
+      <!-- Panel de Captura -->
+      <section class="viewer-panel">
+        <div class="viewer-header">
+          <div class="viewer-title">
+            <span>Visualizando:</span>
+            <strong id="active-viewer-title" style="color: #fff;">Stripe</strong>
+          </div>
+          <div class="viewer-controls">
+            <button class="control-btn" onclick="adjustZoom(-0.1)" title="Alejar zoom">-</button>
+            <span class="control-zoom-label" id="zoom-label">100%</span>
+            <button class="control-btn" onclick="adjustZoom(0.1)" title="Acercar zoom">+</button>
+            <button class="control-btn" onclick="resetZoom()" style="margin-left: 0.25rem;">Ajustar</button>
+          </div>
+        </div>
+        
+        <!-- Imagen con Scroll/Zoom -->
+        <div class="image-container" id="image-container">
+          <img src="assets/stripe.png" alt="Captura de Competidor" class="screenshot-img" id="screenshot-view">
+        </div>
+      </section>
+
+      <!-- Panel de Registro de Feedback -->
+      <section class="feedback-panel">
+        <div class="panel-card">
+          <h3 class="card-title">📝 Evaluación del Sitio</h3>
+          
+          <!-- Puntuación -->
+          <div class="rating-container">
+            <span class="rating-label">¿Cómo calificarías su estilo gráfico? (1 a 5)</span>
+            <div class="stars-row" id="stars-row">
+              <span class="star" data-value="1" onclick="setRating(1)">★</span>
+              <span class="star" data-value="2" onclick="setRating(2)">★</span>
+              <span class="star" data-value="3" onclick="setRating(3)">★</span>
+              <span class="star" data-value="4" onclick="setRating(4)">★</span>
+              <span class="star" data-value="5" onclick="setRating(5)">★</span>
+            </div>
+          </div>
+
+          <!-- Lo que me gustó -->
+          <div class="input-group">
+            <label for="input-likes">✨ Lo que me gustó <span>(Puntos fuertes de diseño, color, etc.)</span></label>
+            <textarea id="input-likes" class="textarea-styled" placeholder="Ej. El degradado animado de fondo es excelente y le da dinamismo..." oninput="updateField('likes', this.value)"></textarea>
+          </div>
+
+          <!-- Lo que no me gustó -->
+          <div class="input-group">
+            <label for="input-dislikes">⚠️ Lo que no me gustó <span>(Puntos a mejorar, distracciones)</span></label>
+            <textarea id="input-dislikes" class="textarea-styled" placeholder="Ej. El menú es muy complejo y cuesta leer el texto sobre las imágenes..." oninput="updateField('dislikes', this.value)"></textarea>
+          </div>
+
+          <!-- Checklist de Temas que No Gustaron -->
+          <div class="input-group" style="margin-bottom: 0;">
+            <label>🔍 Temas / Aspectos que NO te gustaron</label>
+            <div class="checklist-container">
+              <div class="checklist-grid">
+                
+                <label class="check-item">
+                  <input type="checkbox" value="typography" onchange="updateCheckbox(this)">
+                  <div class="custom-checkbox"></div>
+                  <span class="check-label">Tipografía / Legibilidad</span>
+                </label>
+                
+                <label class="check-item">
+                  <input type="checkbox" value="colors" onchange="updateCheckbox(this)">
+                  <div class="custom-checkbox"></div>
+                  <span class="check-label">Colores / Contraste</span>
+                </label>
+                
+                <label class="check-item">
+                  <input type="checkbox" value="layout" onchange="updateCheckbox(this)">
+                  <div class="custom-checkbox"></div>
+                  <span class="check-label">Estructura / Distribución (Layout)</span>
+                </label>
+                
+                <label class="check-item">
+                  <input type="checkbox" value="complexity" onchange="updateCheckbox(this)">
+                  <div class="custom-checkbox"></div>
+                  <span class="check-label">Sobrecarga / Exceso de Elementos</span>
+                </label>
+                
+                <label class="check-item">
+                  <input type="checkbox" value="navigation" onchange="updateCheckbox(this)">
+                  <div class="custom-checkbox"></div>
+                  <span class="check-label">Navegación / Menús</span>
+                </label>
+                
+                <label class="check-item">
+                  <input type="checkbox" value="animations" onchange="updateCheckbox(this)">
+                  <div class="custom-checkbox"></div>
+                  <span class="check-label">Interactividad / Animaciones</span>
+                </label>
+                
+                <label class="check-item">
+                  <input type="checkbox" value="multimedia" onchange="updateCheckbox(this)">
+                  <div class="custom-checkbox"></div>
+                  <span class="check-label">Imágenes y Recursos Multimedia</span>
+                </label>
+
+                <label class="check-item">
+                  <input type="checkbox" value="cta" onchange="updateCheckbox(this)">
+                  <div class="custom-checkbox"></div>
+                  <span class="check-label">Llamados a la Acción (CTA)</span>
+                </label>
+                
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel de Exportación y JSON -->
+        <div class="panel-card export-section">
+          <h3 class="card-title">💾 Exportar Resultados</h3>
+          
+          <div class="button-row">
+            <button class="btn-primary" onclick="copyJsonToClipboard()" id="copy-btn">
+              📋 Copiar JSON
+            </button>
+            <button class="btn-secondary" onclick="downloadJsonFile()">
+              📥 Descargar JSON
+            </button>
+          </div>
+
+          <div class="json-preview-container">
+            <div class="json-preview-header">
+              <span class="json-title">Vista previa del JSON acumulado</span>
+            </div>
+            <pre class="json-code" id="json-preview-block">{}</pre>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal de Confirmación para Borrado -->
+  <div class="modal-overlay" id="clear-modal">
+    <div class="modal-content">
+      <h4 class="modal-title" style="color: #ef4444;">¿Limpiar todos los datos?</h4>
+      <p class="modal-desc">Esto borrará de forma permanente todo el feedback guardado localmente de todos los competidores. Esta acción no se puede deshacer.</p>
+      <div class="modal-buttons">
+        <button class="btn-secondary" onclick="closeClearModal()">Cancelar</button>
+        <button class="btn-primary" style="background: #ef4444; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);" onclick="confirmClearData()">Sí, borrar todo</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Datos iniciales de los competidores
+    const defaultData = {
+      stripe: {
+        name: "Stripe",
+        url: "https://stripe.com/es-us",
+        image: "assets/stripe.png",
+        rating: 0,
+        likes: "",
+        dislikes: "",
+        disliked_topics: []
+      },
+      locomotive: {
+        name: "Locomotive",
+        url: "https://locomotive.ca/en",
+        image: "assets/locomotive.png",
+        rating: 0,
+        likes: "",
+        dislikes: "",
+        disliked_topics: []
+      },
+      yamaha: {
+        name: "Yamaha Incolmotos",
+        url: "https://www.incolmotos-yamaha.com.co/",
+        image: "assets/yamaha.png",
+        rating: 0,
+        likes: "",
+        dislikes: "",
+        disliked_topics: []
+      },
+      walmart: {
+        name: "Walmart",
+        url: "https://www.walmart.com/",
+        image: "assets/walmart.png",
+        rating: 0,
+        likes: "",
+        dislikes: "",
+        disliked_topics: []
+      }
+    };
+
+    let activeCompetitor = "stripe";
+    let appState = JSON.parse(JSON.stringify(defaultData));
+    let zoomLevel = 1.0;
+    
+    // Configuración para permitir arrastrar (pan) en el visualizador de imágenes
+    const imageContainer = document.getElementById('image-container');
+    const screenshotImg = document.getElementById('screenshot-view');
+    let isDragging = false;
+    let startX, startY, scrollLeft, scrollTop;
+
+    imageContainer.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      imageContainer.style.cursor = 'grabbing';
+      startX = e.pageX - imageContainer.offsetLeft;
+      startY = e.pageY - imageContainer.offsetTop;
+      scrollLeft = imageContainer.scrollLeft;
+      scrollTop = imageContainer.scrollTop;
+    });
+
+    imageContainer.addEventListener('mouseleave', () => {
+      isDragging = false;
+      imageContainer.style.cursor = 'grab';
+    });
+
+    imageContainer.addEventListener('mouseup', () => {
+      isDragging = false;
+      imageContainer.style.cursor = 'grab';
+    });
+
+    imageContainer.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      const x = e.pageX - imageContainer.offsetLeft;
+      const y = e.pageY - imageContainer.offsetTop;
+      const walkX = (x - startX);
+      const walkY = (y - startY);
+      imageContainer.scrollLeft = scrollLeft - walkX;
+      imageContainer.scrollTop = scrollTop - walkY;
+    });
+
+    // Cargar datos al iniciar
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedData = localStorage.getItem('competitor_feedback_data');
+      if (savedData) {
+        try {
+          const parsed = JSON.parse(savedData);
+          // Mezclar con estructura base por si se agregan campos nuevos en el futuro
+          Object.keys(defaultData).forEach(key => {
+            if (parsed[key]) {
+              appState[key] = { ...defaultData[key], ...parsed[key] };
+            }
+          });
+        } catch (e) {
+          console.error("Error cargando localStorage", e);
+        }
+      }
+      
+      // Inicializar interfaz
+      switchCompetitor(activeCompetitor);
+      updateStatusBadges();
+      updateJsonPreview();
+      initStarsHover();
+    });
+
+    // Cambiar de competidor activo
+    function switchCompetitor(key) {
+      activeCompetitor = key;
+      
+      // Actualizar botones de la barra lateral
+      document.querySelectorAll('.competitor-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`btn-${key}`).classList.add('active');
+
+      // Actualizar información del visor
+      document.getElementById('active-viewer-title').innerText = appState[key].name;
+      const imgView = document.getElementById('screenshot-view');
+      imgView.src = appState[key].image;
+      
+      // Resetear zoom
+      resetZoom();
+
+      // Cargar datos en el formulario
+      const data = appState[key];
+      
+      // Cargar Calificación de estrellas
+      drawStars(data.rating);
+
+      // Cargar textareas
+      document.getElementById('input-likes').value = data.likes || "";
+      document.getElementById('input-dislikes').value = data.dislikes || "";
+
+      // Cargar checkboxes de temas desagradables
+      document.querySelectorAll('.checklist-container input[type="checkbox"]').forEach(cb => {
+        cb.checked = data.disliked_topics.includes(cb.value);
+      });
+      
+      updateStatusBadges();
+    }
+
+    // Funciones del Visor de Zoom
+    function adjustZoom(amount) {
+      zoomLevel = Math.max(0.2, Math.min(3.0, zoomLevel + amount));
+      applyZoom();
+    }
+
+    function resetZoom() {
+      zoomLevel = 1.0;
+      applyZoom();
+      imageContainer.scrollLeft = 0;
+      imageContainer.scrollTop = 0;
+    }
+
+    function applyZoom() {
+      screenshotImg.style.width = (zoomLevel * 100) + '%';
+      document.getElementById('zoom-label').innerText = Math.round(zoomLevel * 100) + '%';
+    }
+
+    // Manejo interactivo de estrellas (hover)
+    function initStarsHover() {
+      const stars = document.querySelectorAll('.star');
+      stars.forEach(star => {
+        star.addEventListener('mouseenter', function() {
+          const hoverVal = parseInt(this.getAttribute('data-value'));
+          stars.forEach(s => {
+            const val = parseInt(s.getAttribute('data-value'));
+            if (val <= hoverVal) {
+              s.classList.add('hovered');
+            } else {
+              s.classList.remove('hovered');
+            }
+          });
+        });
+
+        star.addEventListener('mouseleave', function() {
+          stars.forEach(s => s.classList.remove('hovered'));
+        });
+      });
+    }
+
+    function drawStars(rating) {
+      const stars = document.querySelectorAll('.star');
+      stars.forEach(s => {
+        const val = parseInt(s.getAttribute('data-value'));
+        if (val <= rating) {
+          s.classList.add('selected');
+        } else {
+          s.classList.remove('selected');
+        }
+      });
+    }
+
+    function setRating(rating) {
+      appState[activeCompetitor].rating = rating;
+      drawStars(rating);
+      saveState();
+      updateStatusBadges();
+    }
+
+    // Actualizar campos de texto
+    function updateField(field, value) {
+      appState[activeCompetitor][field] = value;
+      saveState();
+      updateStatusBadges();
+    }
+
+    // Actualizar checkboxes de temas
+    function updateCheckbox(checkbox) {
+      const topics = appState[activeCompetitor].disliked_topics;
+      if (checkbox.checked) {
+        if (!topics.includes(checkbox.value)) {
+          topics.push(checkbox.value);
+        }
+      } else {
+        const index = topics.indexOf(checkbox.value);
+        if (index > -1) {
+          topics.splice(index, 1);
+        }
+      }
+      saveState();
+      updateStatusBadges();
+    }
+
+    // Comprobar si un competidor tiene algún feedback cargado
+    function hasFeedback(key) {
+      const item = appState[key];
+      return item.rating > 0 || (item.likes && item.likes.trim() !== "") || (item.dislikes && item.dislikes.trim() !== "") || item.disliked_topics.length > 0;
+    }
+
+    // Guardar el estado actual en LocalStorage y refrescar vistas
+    function saveState() {
+      localStorage.setItem('competitor_feedback_data', JSON.stringify(appState));
+      updateJsonPreview();
+    }
+
+    // Actualizar las insignias en la barra lateral
+    function updateStatusBadges() {
+      Object.keys(appState).forEach(key => {
+        const badge = document.getElementById(`badge-${key}`);
+        const btn = document.getElementById(`btn-${key}`);
+        if (hasFeedback(key)) {
+          badge.innerText = "Con feedback";
+          btn.classList.add('has-feedback');
+        } else {
+          badge.innerText = "Sin feedback";
+          btn.classList.remove('has-feedback');
+        }
+      });
+    }
+
+    // Actualizar el bloque de vista previa del JSON
+    function updateJsonPreview() {
+      // Formatear el JSON para quitar detalles irrelevantes de la herramienta interna (como nombres temporales de imágenes)
+      // y entregarlo lo más limpio y enfocado posible para el prompt de la nueva IA.
+      const cleanJson = {};
+      Object.keys(appState).forEach(key => {
+        cleanJson[key] = {
+          sitio: appState[key].name,
+          url: appState[key].url,
+          puntuacion_grafica: appState[key].rating || null,
+          lo_que_me_gusto: appState[key].likes || null,
+          lo_que_no_me_gusto: appState[key].dislikes || null,
+          temas_que_no_me_gustaron: appState[key].disliked_topics.map(t => {
+            const labels = {
+              typography: "Tipografía / Legibilidad",
+              colors: "Colores / Contraste",
+              layout: "Estructura / Distribución (Layout)",
+              complexity: "Sobrecarga / Exceso de Elementos",
+              navigation: "Navegación / Menús",
+              animations: "Interactividad / Animaciones",
+              multimedia: "Imágenes y Recursos Multimedia",
+              cta: "Llamados a la Acción (CTA)"
+            };
+            return labels[t] || t;
+          })
+        };
+      });
+
+      document.getElementById('json-preview-block').innerText = JSON.stringify(cleanJson, null, 2);
+    }
+
+    // Copiar JSON al portapapeles
+    function copyJsonToClipboard() {
+      const codeBlock = document.getElementById('json-preview-block');
+      const text = codeBlock.innerText;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        const copyBtn = document.getElementById('copy-btn');
+        const originalText = copyBtn.innerText;
+        copyBtn.innerText = "✓ ¡Copiado!";
+        copyBtn.style.background = "linear-gradient(135deg, var(--success), #047857)";
+        copyBtn.style.boxShadow = "0 4px 15px var(--success-glow)";
+        
+        setTimeout(() => {
+          copyBtn.innerText = originalText;
+          copyBtn.style.background = "";
+          copyBtn.style.boxShadow = "";
+        }, 2000);
+      }).catch(err => {
+        alert("No se pudo copiar el texto automáticamente. Cópialo manualmente de la caja.");
+      });
+    }
+
+    // Descargar el archivo JSON localmente
+    function downloadJsonFile() {
+      const codeBlock = document.getElementById('json-preview-block');
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(codeBlock.innerText);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "competidores_feedback.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    // Modal de limpieza de datos
+    function openClearModal() {
+      document.getElementById('clear-modal').classList.add('active');
+    }
+
+    function closeClearModal() {
+      document.getElementById('clear-modal').classList.remove('active');
+    }
+
+    function confirmClearData() {
+      localStorage.removeItem('competitor_feedback_data');
+      appState = JSON.parse(JSON.stringify(defaultData));
+      switchCompetitor("stripe");
+      updateStatusBadges();
+      updateJsonPreview();
+      closeClearModal();
+    }
+  </script>
+</body>
+</html>
