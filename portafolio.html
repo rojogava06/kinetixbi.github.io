@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portafolio Corporativo - KinetixBI</title>
+  <meta name="description" content="Presentación interactiva y portafolio de servicios de transformación digital y deep tech - KinetixBI.">
+  
+  <!-- CSS Links (from design system) -->
+  <link rel="stylesheet" href="css/design-system.css">
+  <link rel="stylesheet" href="css/components.css">
+
+  <style>
+    /* Custom Presentation Layout Styles */
+    body {
+      background-color: var(--bg-main);
+      background-image: 
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(6, 182, 212, 0.08), transparent 60%),
+        radial-gradient(ellipse 60% 40% at 5% 15%, rgba(99, 102, 241, 0.15), transparent 55%),
+        linear-gradient(rgba(255, 255, 255, 0.005) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.005) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .presentation-container {
+      max-width: 1400px;
+      width: 100%;
+      margin: 100px auto 40px;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 2.5rem;
+      flex-grow: 1;
+    }
+
+    /* Menu lateral */
+    .sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      position: sticky;
+      top: 100px;
+      height: fit-content;
+    }
+
+    .menu-item {
+      background: var(--bg-glass);
+      backdrop-filter: var(--blur-md);
+      -webkit-backdrop-filter: var(--blur-md);
+      border: 1px solid var(--glass-border);
+      padding: 1.1rem 1.4rem;
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .menu-item:hover {
+      background: var(--bg-glass-hover);
+      color: var(--text-primary);
+      border-color: var(--primary-glow);
+      transform: translateX(4px);
+    }
+
+    .menu-item.active {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%);
+      color: var(--text-primary);
+      border-color: var(--accent);
+      box-shadow: 0 0 25px rgba(6, 182, 212, 0.15), inset 0 0 10px rgba(99, 102, 241, 0.2);
+    }
+
+    .menu-item-num {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent);
+      opacity: 0.8;
+      font-family: monospace;
+    }
+
+    /* Area de contenido / Slides */
+    .slide-viewer {
+      background: var(--bg-glass);
+      backdrop-filter: var(--blur-lg);
+      -webkit-backdrop-filter: var(--blur-lg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 3rem;
+      min-height: 620px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    .slide-viewer::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; width: 120px; height: 120px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .slide {
+      display: none;
+      animation: slideFadeIn 0.5s var(--transition-slow) forwards;
+    }
+
+    .slide.active {
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    @keyframes slideFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .slide-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      font-family: var(--font-display);
+      margin-bottom: 0.5rem;
+    }
+
+    .tech-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 99px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      width: fit-content;
+    }
+
+    .slide-body {
+      font-family: var(--font-body);
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      line-height: 1.8;
+    }
+
+    .slide-body strong {
+      color: var(--text-primary);
+    }
+
+    .slide-footer {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 1.5rem;
+      margin-top: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-tertiary);
+      font-size: 0.85rem;
+    }
+
+    /* Bullet List de Alta Gama */
+    .tech-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.95rem;
+      margin: 1.2rem 0;
+    }
+
+    .tech-list-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .tech-list-icon {
+      margin-top: 5px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* Grid de servicios */
+    .services-presentation-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    .service-mini-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      transition: var(--transition-smooth);
+    }
+
+    .service-mini-card:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--primary-glow);
+      transform: translateY(-2px);
+    }
+
+    .service-mini-title {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .service-mini-title span {
+      color: var(--accent);
+    }
+
+    .service-mini-desc {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Portafolio Sub-tabs */
+    .portfolio-subtabs {
+      display: flex;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .subtab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-tertiary);
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 0.4rem 0.8rem;
+      transition: var(--transition-fast);
+      position: relative;
+    }
+
+    .subtab-btn:hover, .subtab-btn.active {
+      color: var(--text-primary);
+    }
+
+    .subtab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -0.85rem; left: 0; right: 0; height: 2px;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .presentation-container {
+        grid-template-columns: 1fr;
+        margin-top: 90px;
+      }
+      .sidebar-menu {
+        position: static;
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+      }
+      .menu-item {
+        white-space: nowrap;
+      }
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+      .navbar, .sidebar-menu, .copy-btn-container {
+        display: none !important;
+      }
+      .presentation-container {
+        grid-template-columns: 1fr;
+        margin: 0;
+        padding: 0;
+      }
+      .slide-viewer {
+        border: none;
+        box-shadow: none;
+        background: transparent;
+        padding: 0;
+      }
+      .slide {
+        display: block !important;
+        page-break-after: always;
+        opacity: 1 !important;
+      }
+      .slide-title {
+        color: #000 !important;
+      }
+      .service-mini-card {
+        border: 1px solid #ccc !important;
+        background: transparent !important;
+        page-break-inside: avoid;
+      }
+      .text-gradient, .text-gradient-primary {
+        background: none !important;
+        -webkit-text-fill-color: initial !important;
+        color: #000 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation (Uniform with main site) -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">
+      <img src="logo.png" alt="KinetixBI" class="navbar-logo-img" style="height: 30px;">
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Inicio</a>
+      <a href="feedback.html">Herramienta Feedback</a>
+      <a href="#" class="text-gradient-primary" style="font-weight: 600;">Portafolio Corporativo</a>
+    </div>
+  </nav>
+
+  <!-- Presentation Main Container -->
+  <div class="presentation-container">
+    
+    <!-- Left Sidebar Menu -->
+    <div class="sidebar-menu">
+      <button class="menu-item active" onclick="app.showSlide(0)">
+        <span class="menu-item-num">01</span> Identidad de Marca
+      </button>
+      <button class="menu-item" onclick="app.showSlide(1)">
+        <span class="menu-item-num">02</span> Público Objetivo
+      </button>
+      <button class="menu-item" onclick="app.showSlide(2)">
+        <span class="menu-item-num">03</span> Problemas que Resuelve
+      </button>
+      <button class="menu-item" onclick="app.showSlide(3)">
+        <span class="menu-item-num">04</span> Portafolio de Servicios
+      </button>
+      <button class="menu-item" onclick="app.showSlide(4)">
+        <span class="menu-item-num">05</span> Propuesta de Valor
+      </button>
+      <button class="menu-item" onclick="app.showSlide(5)">
+        <span class="menu-item-num">06</span> Canales de Contacto
+      </button>
+      <button class="menu-item" onclick="app.showSlide(6)">
+        <span class="menu-item-num">07</span> Intangibles & Ética
+      </button>
+    </div>
+
+    <!-- Right Presentation Viewer -->
+    <div class="slide-viewer">
+      
+      <!-- SLIDE 1: IDENTIDAD -->
+      <div class="slide active">
+        <div>
+          <div class="tech-tag">
+            <span style="width: 5px; height: 5px; border-radius: 50%; background: var(--accent); display: inline-block;"></span>
+            Identidad Corporativa
+          </div>
+          <h2 class="slide-title text-gradient-primary">KinetixBI</h2>
+          <p style="font-size: 1.15rem; color: var(--text-primary); font-weight: 300; margin-bottom: 1rem;">
+            Digital Intelligence & Transformation &middot; Fundada en 2026
+          </p>
+        </div>
+        
+        <div class="slide-body">
+          <p style="margin-bottom: 1.25rem;">
+            Nacemos y estructuramos nuestro marco metodológico sobre las herramientas profesionales adquiridas en <strong>ESIC Business School</strong>. Esto nos permite fusionar la visión estratégica comercial B2B con la disrupción tecnológica más avanzada.
+          </p>
+          
+          <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem; margin-top: 1rem;">
+            <p style="font-style: italic; color: var(--text-primary); margin-bottom: 0.5rem; font-weight: 500;">"Nuestra Misión:"</p>
+            <p style="font-size: 0.95rem; color: var(--text-secondary);">
+              Guiar a las organizaciones consolidadas en el desarrollo de arquitecturas de software sólidas, business intelligence de alta precisión y automatizaciones mediante IA Enterprise, garantizando soberanía tecnológica y sostenibilidad.
+            </p>
+          </div>
+        </div>
+        
+        <div class="slide-footer">
+          <span>KinetixBI &copy; 2026</span>
+          <span>Slide 1 / 7</span>
+        </div>
+      </div>
+
+      <!-- SLIDE 2: TARGET -->
+      <div class="slide">
+        <div>
+          <div class="tech-tag">Público Objetivo</div>
+          <h2 class="slide-title text-gradient-primary">A Quién Nos Dirigimos</h2>
+        </div>
+        
+        <div class="slide-body">
+          <p style="margin-bottom: 1rem;">Diseñamos soluciones tecnológicas a medida enfocadas en tres perfiles corporativos clave:</p>
+          
+          <ul class="tech-list">
+            <li class="tech-list-item">
+              <svg class="tech-list-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+              <div>
+                <strong>Empresas B2B & B2C en Crecimiento:</strong> Organizaciones que tienen sistemas e información dispersos y buscan centralizar su operativa en una sola infraestructura interconectada.
+              </div>
+            </li>
+            <li class="tech-list-item">
+              <svg class="tech-list-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+              <div>
+                <strong>Direcciones de Tecnología (CTO) y Operaciones (COO):</strong> Líderes que buscan externalizar módulos avanzados o integraciones complejas de API a un equipo externo de ingeniería con altos estándares de desarrollo.
+              </div>
+            </li>
+            <li class="tech-list-item">
+              <svg class="tech-list-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+              <div>
+                <strong>Negocios Tradicionales en Transformación:</strong> Compañías que desean integrar Inteligencia Artificial, automatizaciones robóticas o Cloud Computing en sus flujos sin desestabilizar su negocio.
+              </div>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="slide-footer">
+          <span>KinetixBI &copy; 2026</span>
+          <span>Slide 2 / 7</span>
+        </div>
+      </div>
+
+      <!-- SLIDE 3: PROBLEMAS -->
+      <div class="slide">
+        <div>
+          <div class="tech-tag">Eficiencia Operativa</div>
+          <h2 class="slide-title text-gradient-primary">Desafíos que Resolvemos</h2>
+        </div>
+        
+        <div class="slide-body">
+          <p style="margin-bottom: 1.25rem;">Destrabamos el potencial de crecimiento de las empresas eliminando sus fricciones tecnológicas habituales:</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+            <div style="background: rgba(239, 68, 68, 0.03); border: 1px solid rgba(239, 68, 68, 0.15); padding: 1.25rem; border-radius: var(--radius-md);">
+              <h4 style="color: #ef4444; font-family: var(--font-sans); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="display:inline-block; width: 6px; height: 6px; background:#ef4444; border-radius:50%;"></span>
+                Silos & Desconexión
+              </h4>
+              <p style="font-size: 0.88rem; color: var(--text-secondary);">ERPs, CRMs y pasarelas de pago desconectados que obligan al personal a duplicar tareas y entorpecen la logística de los datos.</p>
+            </div>
+            
+            <div style="background: rgba(245, 158, 11, 0.03); border: 1px solid rgba(245, 158, 11, 0.15); padding: 1.25rem; border-radius: var(--radius-md);">
+              <h4 style="color: #f59e0b; font-family: var(--font-sans); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="display:inline-block; width: 6px; height: 6px; background:#f59e0b; border-radius:50%;"></span>
+                Tareas Manuales
+              </h4>
+              <p style="font-size: 0.88rem; color: var(--text-secondary);">Procesamiento ineficiente de documentos, correos y reportes que restan horas operativas y aumentan el riesgo de error humano.</p>
+            </div>
+
+            <div style="background: rgba(6, 182, 212, 0.03); border: 1px solid rgba(6, 182, 212, 0.15); padding: 1.25rem; border-radius: var(--radius-md);">
+              <h4 style="color: var(--accent); font-family: var(--font-sans); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="display:inline-block; width: 6px; height: 6px; background:var(--accent); border-radius:50%;"></span>
+                Falta de Trazabilidad
+              </h4>
+              <p style="font-size: 0.88rem; color: var(--text-secondary);">Dificultad para tomar decisiones rápidas y asertivas por la falta de tableros de BI unificados y reportes automatizados en tiempo real.</p>
+            </div>
+
+            <div style="background: rgba(168, 85, 247, 0.03); border: 1px solid rgba(168, 85, 247, 0.15); padding: 1.25rem; border-radius: var(--radius-md);">
+              <h4 style="color: var(--purple); font-family: var(--font-sans); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="display:inline-block; width: 6px; height: 6px; background:var(--purple); border-radius:50%;"></span>
+                Complejidad en Adopción
+              </h4>
+              <p style="font-size: 0.88rem; color: var(--text-secondary);">Falta de capacitación o interfaces complicadas que hacen fracasar las iniciativas de implementación de IA o almacenamiento en la nube.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="slide-footer">
+          <span>KinetixBI &copy; 2026</span>
+          <span>Slide 3 / 7</span>
+        </div>
+      </div>
+
+      <!-- SLIDE 4: PORTAFOLIO -->
+      <div class="slide">
+        <div>
+          <div class="tech-tag">Catálogo Tecnológico</div>
+          <h2 class="slide-title text-gradient-primary">Portafolio de Servicios</h2>
+        </div>
+        
+        <div class="portfolio-subtabs">
+          <button class="subtab-btn active" onclick="app.switchSubTab(0)">Soluciones Core</button>
+          <button class="subtab-btn" onclick="app.switchSubTab(1)">Tecnologías de Frontera</button>
+        </div>
+
+        <div class="slide-body" style="flex-grow: 1;">
+          <!-- Subtab 0: Core -->
+          <div id="subtab-content-0" class="services-presentation-grid">
+            <div class="service-mini-card">
+              <h5 class="service-mini-title"><span>&middot;</span> Consultoría Estratégica</h5>
+              <p class="service-mini-desc">Auditoría del ecosistema, diseño de arquitecturas robustas y hojas de ruta alineadas al retorno de inversión.</p>
+            </div>
+            <div class="service-mini-card">
+              <h5 class="service-mini-title"><span>&middot;</span> Software a Medida</h5>
+              <p class="service-mini-desc">Plataformas web, paneles interactivos, front-ends responsivos y APIs optimizadas con diseño UI/UX de alta fidelidad.</p>
+            </div>
+            <div class="service-mini-card">
+              <h5 class="service-mini-title"><span>&middot;</span> Ecosistemas Digitales</h5>
+              <p class="service-mini-desc">Integración fluida de sistemas existentes (CRMs heredados, ERPs como SAP, y pasarelas financieras de pago).</p>
+            </div>
+            <div class="service-mini-card">
+              <h5 class="service-mini-title"><span>&middot;</span> Soporte y Evolución</h5>
+              <p class="service-mini-desc">Acompañamiento y mantenimiento proactivo para asegurar el correcto funcionamiento y escalabilidad de tu software.</p>
+            </div>
+          </div>
+
+          <!-- Subtab 1: Frontera (Deep Tech) -->
+          <div id="subtab-content-1" class="services-presentation-grid" style="display: none;">
+            <div class="service-mini-card">
+              <h5 class="service-mini-title"><span>&middot;</span> Inteligencia Artificial</h5>
+              <p class="service-mini-desc">Agentes autónomos de IA conversacionales y modelos predictivos para automatizar flujos corporativos.</p>
+            </div>
+            <div class="service-mini-card">
+              <h5 class="service-mini-title"><span>&middot;</span> Big Data & Analytics</h5>
+              <p class="service-mini-desc">Infraestructuras para ingesta masiva (Data Lakes) y reportes de BI avanzados en tiempo real.</p>
+            </div>
+            <div class="service-mini-card">
+              <h5 class="service-mini-title"><span>&middot;</span> Cloud Computing</h5>
+              <p class="service-mini-desc">Migración, DevOps y orquestación resiliente en la nube (AWS, Microsoft Azure, Google Cloud).</p>
+            </div>
+            <div class="service-mini-card">
+              <h5 class="service-mini-title"><span>&middot;</span> Blockchain</h5>
+              <p class="service-mini-desc">Contratos inteligentes inmutables (Smart Contracts) y trazabilidad segura de cadenas de suministro.</p>
+            </div>
+            <div class="service-mini-card" style="grid-column: span 2;">
+              <h5 class="service-mini-title"><span>&middot;</span> IoT y Realidad Inmersiva (AR/VR)</h5>
+              <p class="service-mini-desc">Telemetría de sensores en tiempo real junto con simulaciones tridimensionales inmersivas y gemelos digitales de activos físicos para entrenamiento y fuerza de venta B2B.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="slide-footer">
+          <span>KinetixBI &copy; 2026</span>
+          <span>Slide 4 / 7</span>
+        </div>
+      </div>
+
+      <!-- SLIDE 5: PROPUESTA DE VALOR -->
+      <div class="slide">
+        <div>
+          <div class="tech-tag">¿Por qué KinetixBI?</div>
+          <h2 class="slide-title text-gradient-primary">Nuestra Propuesta de Valor</h2>
+        </div>
+        
+        <div class="slide-body">
+          <p style="margin-bottom: 1.25rem;">Nos diferenciamos de las agencias tradicionales mediante tres pilares operativos estratégicos:</p>
+          
+          <div style="background: rgba(99, 102, 241, 0.04); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1rem;">
+            <h4 style="font-family: var(--font-sans); color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-size: 1.25rem;">💎</span> Transparencia Radical (Centro de Seguimiento)
+            </h4>
+            <p style="font-size: 0.95rem; color: var(--text-secondary);">
+              Acceso en tiempo real a la plataforma donde visualizas la construcción de tu software, commits de código y estado del proyecto sin misterios.
+            </p>
+          </div>
+
+          <div style="background: rgba(6, 182, 212, 0.04); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1rem;">
+            <h4 style="font-family: var(--font-sans); color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-size: 1.25rem;">🎓</span> Enfoque de Negocios ESIC
+            </h4>
+            <p style="font-size: 0.95rem; color: var(--text-secondary);">
+              No programamos solo por programar. Cada solución nace de una estrategia financiera, operativa y comercial diseñada para maximizar el ROI.
+            </p>
+          </div>
+
+          <div style="background: rgba(217, 70, 239, 0.04); border: 1px solid rgba(217, 70, 239, 0.2); border-radius: var(--radius-md); padding: 1.5rem;">
+            <h4 style="font-family: var(--font-sans); color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-size: 1.25rem;">✨</span> UI/UX de Alta Gama
+            </h4>
+            <p style="font-size: 0.95rem; color: var(--text-secondary);">
+              Interfaces sofisticadas que proyectan seriedad y modernidad, facilitando la adopción por parte de tus clientes y empleados.
+            </p>
+          </div>
+        </div>
+        
+        <div class="slide-footer">
+          <span>KinetixBI &copy; 2026</span>
+          <span>Slide 5 / 7</span>
+        </div>
+      </div>
+
+      <!-- SLIDE 6: CONTACTO -->
+      <div class="slide">
+        <div>
+          <div class="tech-tag">Canales de Comunicación</div>
+          <h2 class="slide-title text-gradient-primary">Contacto & Cotización</h2>
+        </div>
+        
+        <div class="slide-body">
+          <p style="margin-bottom: 1.5rem;">Hacemos que sea extremadamente sencillo iniciar la consultoría digital:</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            
+            <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.75rem; text-align: center; display: flex; flex-direction: column; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="width: 50px; height: 50px; background: rgba(6,182,212,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; color: var(--accent);">
+                  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h4 style="font-family: var(--font-sans); margin-bottom: 0.5rem; color: var(--text-primary);">Consultoría Inteligente</h4>
+                <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">Nuestra herramienta de onboarding web te guía paso a paso para estructurar tus requerimientos y generarte un brief corporativo automático.</p>
+              </div>
+              <a href="index.html" class="btn btn-primary" style="padding: 0.5rem 1.25rem; font-size: 0.85rem;">Iniciar Onboarding</a>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.75rem; text-align: center; display: flex; flex-direction: column; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="width: 50px; height: 50px; background: rgba(16,185,129,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; color: var(--success);">
+                  <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                </div>
+                <h4 style="font-family: var(--font-sans); margin-bottom: 0.5rem; color: var(--text-primary);">WhatsApp de Negocios</h4>
+                <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">Resuelve dudas o agenda una reunión directamente con nuestros consultores vía chat empresarial instantáneo.</p>
+              </div>
+              <a href="https://www.whatsapp.com/business/" target="_blank" class="btn" style="background: rgba(16,185,129,0.1); color: var(--success); border: 1px solid rgba(16,185,129,0.3); padding: 0.5rem 1.25rem; font-size: 0.85rem;">Escríbenos</a>
+            </div>
+
+          </div>
+        </div>
+        
+        <div class="slide-footer">
+          <span>KinetixBI &copy; 2026</span>
+          <span>Slide 6 / 7</span>
+        </div>
+      </div>
+
+      <!-- SLIDE 7: INTANGIBLES -->
+      <div class="slide">
+        <div>
+          <div class="tech-tag">Activos Estratégicos</div>
+          <h2 class="slide-title text-gradient-primary">Nuestros Intangibles</h2>
+        </div>
+        
+        <div class="slide-body">
+          <p style="margin-bottom: 1.25rem;">Nuestros activos inmateriales representan la garantía de calidad técnica y ética a largo plazo:</p>
+          
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem;">
+            <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem;">
+              <h5 style="color: var(--text-primary); font-family: var(--font-sans); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--accent);">✦</span>
+                Soberanía Tecnológica
+              </h5>
+              <p style="font-size: 0.88rem; color: var(--text-secondary);">El código es de tu propiedad. Entregamos toda la documentación para que seas dueño de tu plataforma sin dependencias.</p>
+            </div>
+            
+            <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem;">
+              <h5 style="color: var(--text-primary); font-family: var(--font-sans); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--accent);">✦</span>
+                Gobernanza Ética
+              </h5>
+              <p style="font-size: 0.88rem; color: var(--text-secondary);">Modelos de IA seguros y auditables que cumplen estrictamente con la privacidad de datos (RGPD) y buenas prácticas éticas.</p>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem;">
+              <h5 style="color: var(--text-primary); font-family: var(--font-sans); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--accent);">✦</span>
+                Metodología Ágil
+              </h5>
+              <p style="font-size: 0.88rem; color: var(--text-secondary);">Células de desarrollo altamente adaptativas que permiten ajustar prioridades a la velocidad de tu negocio.</p>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem;">
+              <h5 style="color: var(--text-primary); font-family: var(--font-sans); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--accent);">✦</span>
+                Co-Creación
+              </h5>
+              <p style="font-size: 0.88rem; color: var(--text-secondary);">Colaboración estrecha y talleres conjuntos para asegurar una adopción de herramientas fluida por parte de tus empleados.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="slide-footer">
+          <span>KinetixBI &copy; 2026</span>
+          <span>Slide 7 / 7</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Botones de Acción (NotebookLM / Print) -->
+  <div class="copy-btn-container" style="max-width: 1400px; width: 100%; margin: 0 auto 100px; padding: 0 2rem; display: flex; justify-content: flex-end; gap: 1rem;">
+    <button class="btn" style="background: rgba(255, 255, 255, 0.05); color: var(--text-primary); border: 1px solid var(--border-subtle);" onclick="window.print()">
+      <span>🖨️ Descargar PDF / Imprimir</span>
+    </button>
+    <button id="copy-markdown-btn" class="btn btn-primary" onclick="app.copyMarkdown()">
+      <span>📋 Copiar Contenido para NotebookLM</span>
+    </button>
+  </div>
+
+  <script>
+    const app = {
+      currentSlideIndex: 0,
+      
+      showSlide(index) {
+        this.currentSlideIndex = index;
+        
+        // Actualizar menú lateral
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach((item, idx) => {
+          if (idx === index) {
+            item.classList.add('active');
+          } else {
+            item.classList.remove('active');
+          }
+        });
+
+        // Actualizar vista de Slides
+        const slides = document.querySelectorAll('.slide');
+        slides.forEach((slide, idx) => {
+          if (idx === index) {
+            slide.classList.add('active');
+          } else {
+            slide.classList.remove('active');
+          }
+        });
+      },
+
+      switchSubTab(index) {
+        // Actualizar pestañas del portafolio
+        const tabs = document.querySelectorAll('.subtab-btn');
+        tabs.forEach((tab, idx) => {
+          if (idx === index) {
+            tab.classList.add('active');
+          } else {
+            tab.classList.remove('active');
+          }
+        });
+
+        // Actualizar contenido de sub-tabs
+        const contents = [document.getElementById('subtab-content-0'), document.getElementById('subtab-content-1')];
+        contents.forEach((content, idx) => {
+          if (idx === index) {
+            content.style.display = 'grid';
+          } else {
+            content.style.display = 'none';
+          }
+        });
+      },
+
+      copyMarkdown() {
+        const markdownContent = `# Portafolio de Servicios - KinetixBI (Digital Intelligence & Transformation)
+...`; // Aquí pondremos el contenido real mediante fetch o inyectado para que lo copie directo
+
+        // Fetch local del archivo de markdown para evitar duplicar código en el string
+        fetch('portafolio_notebooklm.md')
+          .then(res => res.text())
+          .then(text => {
+            navigator.clipboard.writeText(text).then(() => {
+              const btn = document.getElementById('copy-markdown-btn');
+              const origText = btn.innerHTML;
+              btn.innerHTML = '<span>✅ Copiado Correctamente!</span>';
+              btn.style.boxShadow = '0 0 25px rgba(16, 185, 129, 0.6)';
+              setTimeout(() => {
+                btn.innerHTML = origText;
+                btn.style.boxShadow = '';
+              }, 2000);
+            });
+          })
+          .catch(err => {
+            console.error('Error cargando markdown para copiar:', err);
+          });
+      }
+    };
+  </script>
+</body>
+</html>
