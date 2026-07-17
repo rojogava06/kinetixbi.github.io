@@ -9,7 +9,7 @@ const app = {
     console.log("KinetixBI initialized.");
     // Initial routing based on hash or default to landing
     const hash = window.location.hash.replace('#', '');
-    if (['landing', 'onboarding', 'crm', 'hub'].includes(hash)) {
+    if (['landing', 'onboarding', 'crm', 'hub', 'maturity-test'].includes(hash)) {
       this.navigateTo(hash);
     } else {
       this.navigateTo('landing');
@@ -19,6 +19,7 @@ const app = {
     if (typeof onboarding !== 'undefined') onboarding.init();
     if (typeof crm !== 'undefined') crm.init();
     if (typeof hub !== 'undefined') hub.init();
+    if (typeof maturityTest !== 'undefined') maturityTest.init();
     
     this.initScrollAnimations();
   },
@@ -61,6 +62,7 @@ const app = {
     // Trigger view-specific refreshes
     if (viewId === 'crm' && typeof crm !== 'undefined') crm.refresh();
     if (viewId === 'hub' && typeof hub !== 'undefined') hub.refresh();
+    if (viewId === 'maturity-test' && typeof maturityTest !== 'undefined') maturityTest.render();
   }
 };
 
